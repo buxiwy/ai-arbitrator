@@ -8,71 +8,87 @@ export function HowItWorks() {
       icon: Scale,
       title: "File a Dispute",
       description: "Submit a dispute against another party. Describe the issue and provide context for the AI judge.",
-      color: "text-accent",
-      bgColor: "bg-accent/10",
+      accent: "rgba(255,255,255,0.7)",
     },
     {
       icon: FileText,
       title: "Submit Evidence",
       description: "Both parties submit evidence to support their case. Text, URLs, images, and documents are accepted.",
-      color: "text-blue-400",
-      bgColor: "bg-blue-400/10",
+      accent: "rgba(100,180,255,0.8)",
     },
     {
       icon: Gavel,
       title: "AI Review",
       description: "The AI judge evaluates all evidence impartially using GenLayer's non-deterministic LLM execution.",
-      color: "text-purple-400",
-      bgColor: "bg-purple-400/10",
+      accent: "rgba(180,130,255,0.8)",
     },
     {
       icon: CheckCircle,
       title: "Verdict Delivered",
       description: "A fair verdict is reached through Optimistic Democracy consensus — validators verify the AI's reasoning.",
-      color: "text-green-400",
-      bgColor: "bg-green-400/10",
+      accent: "rgba(80,220,130,0.8)",
     },
   ];
 
   return (
-    <div className="brand-card p-6 md:p-8 animate-fade-in" style={{ animationDelay: "200ms" }}>
-      <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold mb-2">How it Works</h2>
-        <p className="text-sm text-muted-foreground">Four simple steps to on-chain justice</p>
+    <div className="rounded-xl overflow-hidden animate-fade-in" style={{ animationDelay: "200ms" }}>
+      {/* Feature Illustration Banner */}
+      <div className="relative h-40 overflow-hidden">
+        <img
+          src="/images/Feature Illustration.png"
+          alt="How it Works"
+          className="w-full h-full object-cover"
+          style={{ filter: "brightness(0.7) contrast(1.1)" }}
+        />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(18,18,26,0.3) 0%, rgba(18,18,26,1) 100%)" }} />
+        <div className="absolute bottom-4 left-0 right-0 text-center">
+          <h2 className="text-xl font-bold text-white/95">How it Works</h2>
+          <p className="text-xs text-white/40 mt-1">Four simple steps to on-chain justice</p>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {steps.map((step, index) => (
-          <div key={step.title} className="relative">
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <div className={`w-12 h-12 rounded-xl ${step.bgColor} flex items-center justify-center`}>
-                  <step.icon className={`w-6 h-6 ${step.color}`} />
+      {/* Content */}
+      <div
+        className="p-6"
+        style={{
+          background: "linear-gradient(135deg, rgba(18,18,26,0.95) 0%, rgba(12,12,16,0.98) 100%)",
+          border: "1px solid rgba(255,255,255,0.06)",
+          borderTop: "none",
+        }}
+      >
+        <div className="space-y-4">
+          {steps.map((step, index) => (
+            <div key={step.title} className="flex items-start gap-4">
+              <div className="flex flex-col items-center flex-shrink-0">
+                <div
+                  className="w-9 h-9 rounded-lg flex items-center justify-center"
+                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}
+                >
+                  <step.icon className="w-4 h-4" style={{ color: step.accent }} />
                 </div>
                 {index < steps.length - 1 && (
-                  <ArrowRight className="hidden md:block w-4 h-4 text-muted-foreground absolute right-0 top-6 translate-x-1/2" />
+                  <div className="w-px h-6 mt-1" style={{ background: "rgba(255,255,255,0.06)" }} />
                 )}
               </div>
-              <div>
-                <div className={`font-bold text-lg ${step.color}`}>{step.title}</div>
-                <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
+              <div className="pt-1">
+                <div className="text-sm font-semibold text-white/85">{step.title}</div>
+                <p className="text-xs text-white/35 mt-0.5 leading-relaxed">
                   {step.description}
                 </p>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
 
-      {/* Tech Stack */}
-      <div className="mt-8 pt-6 border-t border-border/50">
-        <div className="text-center">
-          <p className="text-xs text-muted-foreground mb-3">Built with</p>
-          <div className="flex flex-wrap items-center justify-center gap-3">
+        {/* Tech Stack */}
+        <div className="mt-6 pt-4 border-t border-white/[0.06]">
+          <p className="text-[10px] text-white/25 mb-2.5 uppercase tracking-wider text-center">Built with</p>
+          <div className="flex flex-wrap items-center justify-center gap-2">
             {["GenLayer SDK", "Python", "Next.js 15", "TypeScript", "TanStack Query"].map((tech) => (
               <span
                 key={tech}
-                className="px-3 py-1 rounded-full text-xs bg-muted/20 text-muted-foreground border border-border/50"
+                className="px-2.5 py-1 rounded-md text-[10px] text-white/35"
+                style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)" }}
               >
                 {tech}
               </span>

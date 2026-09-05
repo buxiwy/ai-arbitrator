@@ -44,7 +44,7 @@ export default function HomePage() {
         return (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold">My Disputes</h2>
+              <h2 className="text-2xl font-bold text-white/95">My Disputes</h2>
             </div>
             <DisputesTable
               onSelectDispute={setSelectedDisputeId}
@@ -59,37 +59,31 @@ export default function HomePage() {
       case "about":
         return (
           <div className="brand-card p-8 space-y-6">
-            <h2 className="text-2xl font-bold">About AI Arbitrator</h2>
-            <div className="space-y-4 text-muted-foreground">
-              <p>
+            <h2 className="text-2xl font-bold text-white/95">About AI Arbitrator</h2>
+            <div className="space-y-4">
+              <p className="text-sm text-white/50 leading-relaxed">
                 AI Arbitrator is a decentralized dispute resolution platform built on
                 GenLayer blockchain. It uses AI judges to evaluate evidence and deliver
                 fair verdicts, all enforced by smart contract consensus.
               </p>
-              <p>
+              <p className="text-sm text-white/50 leading-relaxed">
                 Traditional dispute resolution costs over $50 billion annually and takes
                 months to resolve. AI Arbitrator provides a faster, cheaper, and more
                 impartial alternative.
               </p>
-              <div className="pt-4 border-t border-border/50">
-                <h3 className="text-lg font-semibold text-foreground mb-2">Built With</h3>
-                <ul className="space-y-2">
-                  <li className="flex items-center gap-2">
-                    <Scale className="w-4 h-4 text-accent" />
-                    <span>GenLayer Intelligent Contracts</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Scale className="w-4 h-4 text-accent" />
-                    <span>Non-deterministic LLM Execution</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Scale className="w-4 h-4 text-accent" />
-                    <span>Optimistic Democracy Consensus</span>
-                  </li>
+              <div className="pt-4 border-t border-white/[0.06]">
+                <h3 className="text-lg font-semibold text-white/80 mb-3">Built With</h3>
+                <ul className="space-y-2.5">
+                  {["GenLayer Intelligent Contracts", "Non-deterministic LLM Execution", "Optimistic Democracy Consensus"].map((item) => (
+                    <li key={item} className="flex items-center gap-2.5">
+                      <Scale className="w-3.5 h-3.5 text-white/30" />
+                      <span className="text-sm text-white/50">{item}</span>
+                    </li>
+                  ))}
                 </ul>
               </div>
-              <div className="pt-4 border-t border-border/50">
-                <p className="text-sm">
+              <div className="pt-4 border-t border-white/[0.06]">
+                <p className="text-xs text-white/25">
                   Built for the GenLayer Agent Tank Hackathon 2024 — Onchain Justice Track
                 </p>
               </div>
@@ -102,13 +96,13 @@ export default function HomePage() {
           <div className="space-y-6">
             <StatsDashboard />
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              <div className="lg:col-span-7">
+              <div className="lg:col-span-8">
                 <DisputesTable
                   onSelectDispute={setSelectedDisputeId}
                   selectedId={selectedDisputeId}
                 />
               </div>
-              <div className="lg:col-span-5">
+              <div className="lg:col-span-4">
                 <HowItWorks />
               </div>
             </div>
@@ -133,12 +127,12 @@ export default function HomePage() {
                 {selectedDisputeId !== null && (
                   <button
                     onClick={() => setSelectedDisputeId(null)}
-                    className="p-2 rounded-lg hover:bg-muted/30 transition-colors"
+                    className="p-2 rounded-lg hover:bg-white/[0.04] transition-colors"
                   >
-                    <ArrowLeft className="w-5 h-5" />
+                    <ArrowLeft className="w-5 h-5 text-white/50" />
                   </button>
                 )}
-                <h1 className="text-lg font-bold">
+                <h1 className="text-lg font-bold text-white/90">
                   {selectedDisputeId !== null
                     ? `Dispute #${selectedDisputeId}`
                     : activeSection === "home"
@@ -153,12 +147,12 @@ export default function HomePage() {
 
               {isConnected && address ? (
                 <div className="flex items-center gap-3">
-                  <div className="text-sm text-muted-foreground bg-card/50 px-3 py-1.5 rounded-lg border border-border/50 font-mono">
+                  <div className="text-xs text-white/50 px-3 py-1.5 rounded-lg font-mono" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
                     {address.slice(0, 6)}...{address.slice(-4)}
                   </div>
                   <button
                     onClick={disconnectWallet}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    className="text-xs text-white/30 hover:text-white/60 transition-colors"
                   >
                     Disconnect
                   </button>

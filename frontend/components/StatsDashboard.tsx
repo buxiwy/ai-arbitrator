@@ -1,7 +1,7 @@
 "use client";
 
 import { useDisputes } from "@/lib/hooks/useAIArbitrator";
-import { Scale, Clock, FileText, Gavel, CheckCircle, TrendingUp, Users, AlertTriangle } from "lucide-react";
+import { Scale, Clock, FileText, Gavel, CheckCircle, TrendingUp } from "lucide-react";
 
 export function StatsDashboard() {
   const { data: disputes = [] } = useDisputes();
@@ -23,41 +23,11 @@ export function StatsDashboard() {
     : 0;
 
   const statCards = [
-    {
-      label: "Total Disputes",
-      value: stats.total,
-      icon: Scale,
-      color: "text-accent",
-      bgColor: "bg-accent/10",
-    },
-    {
-      label: "Open",
-      value: stats.open,
-      icon: Clock,
-      color: "text-yellow-400",
-      bgColor: "bg-yellow-400/10",
-    },
-    {
-      label: "Evidence Submitted",
-      value: stats.evidenceSubmitted,
-      icon: FileText,
-      color: "text-blue-400",
-      bgColor: "bg-blue-400/10",
-    },
-    {
-      label: "Under Review",
-      value: stats.underReview,
-      icon: Gavel,
-      color: "text-purple-400",
-      bgColor: "bg-purple-400/10",
-    },
-    {
-      label: "Decided",
-      value: stats.decided,
-      icon: CheckCircle,
-      color: "text-green-400",
-      bgColor: "bg-green-400/10",
-    },
+    { label: "Total Disputes", value: stats.total, icon: Scale, accent: "rgba(255,255,255,0.7)" },
+    { label: "Open", value: stats.open, icon: Clock, accent: "rgba(255,200,50,0.8)" },
+    { label: "Evidence", value: stats.evidenceSubmitted, icon: FileText, accent: "rgba(100,180,255,0.8)" },
+    { label: "Review", value: stats.underReview, icon: Gavel, accent: "rgba(180,130,255,0.8)" },
+    { label: "Decided", value: stats.decided, icon: CheckCircle, accent: "rgba(80,220,130,0.8)" },
   ];
 
   return (
@@ -67,57 +37,71 @@ export function StatsDashboard() {
         {statCards.map((stat) => (
           <div
             key={stat.label}
-            className="brand-card p-4 flex flex-col items-center gap-2"
+            className="rounded-xl p-4 flex flex-col items-center gap-2.5 transition-all duration-300"
+            style={{
+              background: "linear-gradient(135deg, rgba(18,18,26,0.9) 0%, rgba(14,14,20,0.95) 100%)",
+              border: "1px solid rgba(255,255,255,0.06)",
+              boxShadow: "inset 0 1px 0 0 rgba(255,255,255,0.03), 0 1px 3px 0 rgba(0,0,0,0.3)",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)";
+              e.currentTarget.style.boxShadow = "inset 0 1px 0 0 rgba(255,255,255,0.05), 0 4px 12px 0 rgba(0,0,0,0.4)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)";
+              e.currentTarget.style.boxShadow = "inset 0 1px 0 0 rgba(255,255,255,0.03), 0 1px 3px 0 rgba(0,0,0,0.3)";
+            }}
           >
-            <div className={`w-10 h-10 rounded-lg ${stat.bgColor} flex items-center justify-center`}>
-              <stat.icon className={`w-5 h-5 ${stat.color}`} />
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: "rgba(255,255,255,0.04)" }}>
+              <stat.icon className="w-5 h-5" style={{ color: stat.accent }} />
             </div>
-            <span className="text-2xl font-bold">{stat.value}</span>
-            <span className="text-xs text-muted-foreground text-center">{stat.label}</span>
+            <span className="text-2xl font-bold text-white/95">{stat.value}</span>
+            <span className="text-[11px] text-white/40 text-center">{stat.label}</span>
           </div>
         ))}
       </div>
 
       {/* Verdict Stats */}
       {stats.decided > 0 && (
-        <div className="brand-card p-4">
+        <div
+          className="rounded-xl p-4"
+          style={{
+            background: "linear-gradient(135deg, rgba(18,18,26,0.9) 0%, rgba(14,14,20,0.95) 100%)",
+            border: "1px solid rgba(255,255,255,0.06)",
+            boxShadow: "inset 0 1px 0 0 rgba(255,255,255,0.03)",
+          }}
+        >
           <div className="flex items-center gap-2 mb-3">
-            <TrendingUp className="w-4 h-4 text-accent" />
-            <span className="text-sm font-medium">Verdict Breakdown</span>
+            <TrendingUp className="w-4 h-4 text-white/60" />
+            <span className="text-sm font-medium text-white/80">Verdict Breakdown</span>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-green-400" />
-              <span className="text-sm text-muted-foreground">Plaintiff Wins</span>
-              <span className="text-sm font-medium ml-auto">{stats.plaintiffWins}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-red-400" />
-              <span className="text-sm text-muted-foreground">Defendant Wins</span>
-              <span className="text-sm font-medium ml-auto">{stats.defendantWins}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-yellow-400" />
-              <span className="text-sm text-muted-foreground">Split</span>
-              <span className="text-sm font-medium ml-auto">{stats.split}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-gray-400" />
-              <span className="text-sm text-muted-foreground">Dismissed</span>
-              <span className="text-sm font-medium ml-auto">{stats.dismissed}</span>
-            </div>
+            {[
+              { label: "Plaintiff Wins", count: stats.plaintiffWins, color: "#50DC82" },
+              { label: "Defendant Wins", count: stats.defendantWins, color: "#FF6B6B" },
+              { label: "Split", count: stats.split, color: "#FFC832" },
+              { label: "Dismissed", count: stats.dismissed, color: "#636366" },
+            ].map((item) => (
+              <div key={item.label} className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 rounded-full" style={{ background: item.color }} />
+                <span className="text-sm text-white/40">{item.label}</span>
+                <span className="text-sm font-medium text-white/80 ml-auto">{item.count}</span>
+              </div>
+            ))}
           </div>
 
-          {/* Win Rate Bar */}
-          <div className="mt-4 pt-3 border-t border-border/50">
+          <div className="mt-4 pt-3 border-t border-white/[0.06]">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-muted-foreground">Plaintiff Win Rate</span>
-              <span className="text-xs font-medium text-accent">{winRate}%</span>
+              <span className="text-xs text-white/40">Plaintiff Win Rate</span>
+              <span className="text-xs font-medium text-white/70">{winRate}%</span>
             </div>
-            <div className="h-2 bg-muted/30 rounded-full overflow-hidden">
+            <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
               <div
-                className="h-full bg-gradient-to-r from-green-400 to-green-500 rounded-full transition-all duration-500"
-                style={{ width: `${winRate}%` }}
+                className="h-full rounded-full transition-all duration-500"
+                style={{
+                  width: `${winRate}%`,
+                  background: "linear-gradient(90deg, #50DC82 0%, #3CB371 100%)",
+                }}
               />
             </div>
           </div>
