@@ -1,11 +1,11 @@
 {
-  "name": "GenLayer Football Market",
-  "short_name": "GenLayer Market",
-  "description": "AI-powered football match predictions on GenLayer blockchain",
+  "name": "AI Arbitrator",
+  "short_name": "AI Arbitrator",
+  "description": "AI-powered decentralized dispute resolution on GenLayer blockchain",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#9B6AF6",
+  "background_color": "#08080A",
+  "theme_color": "#08080A",
   "icons": [
     {
       "src": "/favicon.svg",

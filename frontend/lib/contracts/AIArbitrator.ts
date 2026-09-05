@@ -117,6 +117,33 @@ class AIArbitrator {
     }
   }
 
+  async getUserDisputes(userAddress: string): Promise<Dispute[]> {
+    try {
+      const disputeIds: any = await this.client.readContract({
+        address: this.contractAddress,
+        functionName: "get_user_disputes",
+        args: [userAddress],
+      });
+
+      const ids = Array.isArray(disputeIds)
+        ? disputeIds.map((id: any) => Number(id))
+        : [];
+
+      const disputes: Dispute[] = [];
+      for (const id of ids) {
+        const dispute = await this.getDispute(id);
+        if (dispute) {
+          disputes.push(dispute);
+        }
+      }
+
+      return disputes.reverse();
+    } catch (error) {
+      console.error("Error fetching user disputes:", error);
+      return [];
+    }
+  }
+
   async createDispute(
     defendant: string,
     title: string,

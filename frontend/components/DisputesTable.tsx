@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useDisputes, useDisputeCount } from "@/lib/hooks/useAIArbitrator";
+import { useDisputes, useDisputeCount, useUserDisputes } from "@/lib/hooks/useAIArbitrator";
 import { useWallet } from "@/lib/genlayer/WalletProvider";
 import { Shield, Clock, CheckCircle, AlertCircle, Gavel, FileText, Search, X } from "lucide-react";
 import type { Dispute } from "@/lib/contracts/types";
@@ -44,12 +44,17 @@ const verdictColors: Record<string, string> = {
 interface DisputesTableProps {
   onSelectDispute: (id: number) => void;
   selectedId: number | null;
+  filterByAddress?: boolean;
 }
 
-export function DisputesTable({ onSelectDispute, selectedId }: DisputesTableProps) {
-  const { data: disputes = [], isLoading } = useDisputes();
+export function DisputesTable({ onSelectDispute, selectedId, filterByAddress }: DisputesTableProps) {
+  const { data: allDisputes = [], isLoading: isLoadingAll } = useDisputes();
+  const { data: userDisputes = [], isLoading: isLoadingUser } = useUserDisputes();
   const { data: count = 0 } = useDisputeCount();
   const { address } = useWallet();
+
+  const disputes = filterByAddress ? userDisputes : allDisputes;
+  const isLoading = filterByAddress ? isLoadingUser : isLoadingAll;
 
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");

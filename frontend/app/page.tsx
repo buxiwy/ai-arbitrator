@@ -7,6 +7,7 @@ import { DisputeDetail } from "@/components/DisputeDetail";
 import { CreateDisputeModal } from "@/components/CreateDisputeModal";
 import { HowItWorks } from "@/components/HowItWorks";
 import { StatsDashboard } from "@/components/StatsDashboard";
+import { Footer } from "@/components/Footer";
 import { useWallet } from "@/lib/genlayer/WalletProvider";
 import { Scale, ArrowLeft, Wallet } from "lucide-react";
 
@@ -49,6 +50,7 @@ export default function HomePage() {
             <DisputesTable
               onSelectDispute={setSelectedDisputeId}
               selectedId={selectedDisputeId}
+              filterByAddress={true}
             />
           </div>
         );
@@ -173,6 +175,7 @@ export default function HomePage() {
 
         <div className="p-6">
           {renderContent()}
+          <Footer />
         </div>
       </main>
 

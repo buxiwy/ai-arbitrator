@@ -51,6 +51,22 @@ export function useDisputes() {
   });
 }
 
+export function useUserDisputes() {
+  const contract = useAIArbitratorContract();
+  const { address } = useWallet();
+
+  return useQuery<Dispute[], Error>({
+    queryKey: ["userDisputes", address],
+    queryFn: () => {
+      if (!contract || !address) return Promise.resolve([]);
+      return contract.getUserDisputes(address);
+    },
+    refetchOnWindowFocus: true,
+    staleTime: 2000,
+    enabled: !!contract && !!address,
+  });
+}
+
 export function useDispute(id: number) {
   const contract = useAIArbitratorContract();
 
