@@ -1,11 +1,10 @@
 "use client";
 
 import { useWallet } from "@/lib/genlayer/WalletProvider";
-import { Scale, Wallet } from "lucide-react";
+import { Scale } from "lucide-react";
 
 export function Navbar() {
-  const { address, isConnected, isLoading, connectWallet, disconnectWallet } =
-    useWallet();
+  const { address, isConnected, disconnectWallet } = useWallet();
 
   const formatAddress = (addr: string) =>
     `${addr.slice(0, 6)}...${addr.slice(-4)}`;
@@ -25,8 +24,7 @@ export function Navbar() {
             {isConnected && address ? (
               <div className="flex items-center gap-3">
                 <div className="text-sm text-muted-foreground bg-card/50 px-3 py-1.5 rounded-lg border border-border/50">
-                  <span className="hidden md:inline">{formatAddress(address)}</span>
-                  <span className="md:hidden">{formatAddress(address)}</span>
+                  {formatAddress(address)}
                 </div>
                 <button
                   onClick={disconnectWallet}
@@ -35,16 +33,7 @@ export function Navbar() {
                   Disconnect
                 </button>
               </div>
-            ) : (
-              <button
-                onClick={connectWallet}
-                disabled={isLoading}
-                className="btn-primary flex items-center gap-2 text-sm"
-              >
-                <Wallet className="w-4 h-4" />
-                {isLoading ? "Connecting..." : "Connect Wallet"}
-              </button>
-            )}
+            ) : null}
           </div>
         </div>
       </div>

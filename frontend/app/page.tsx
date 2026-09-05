@@ -17,7 +17,7 @@ export default function HomePage() {
   const [selectedDisputeId, setSelectedDisputeId] = useState<number | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showWalletModal, setShowWalletModal] = useState(false);
-  const { address, isConnected, isLoading, connectWallet, disconnectWallet } = useWallet();
+  const { address, isConnected, isLoading, connectToWallet, disconnectWallet } = useWallet();
 
   const handleNavigate = (section: string) => {
     setActiveSection(section);
@@ -25,20 +25,11 @@ export default function HomePage() {
   };
 
   const handleSelectWallet = async (walletId: string) => {
-    if (walletId === "metamask") {
-      try {
-        await connectWallet();
-        setShowWalletModal(false);
-      } catch (error) {
-        console.error("Failed to connect:", error);
-      }
-    } else {
-      // For other wallets, check if they're installed
-      const wallet = wallets.find((w) => w.id === walletId);
-      if (wallet?.downloadUrl) {
-        window.open(wallet.downloadUrl, "_blank");
-      }
+    try {
+      await connectToWallet(walletId as any);
       setShowWalletModal(false);
+    } catch (error) {
+      console.error("Failed to connect:", error);
     }
   };
 

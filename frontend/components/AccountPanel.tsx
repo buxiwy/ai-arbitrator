@@ -1,63 +1,34 @@
 "use client";
 
 import { useState } from "react";
-import { User, LogOut, AlertCircle, ExternalLink } from "lucide-react";
+import { User } from "lucide-react";
 import { useWallet } from "@/lib/genlayer/WalletProvider";
-import { success, error, userRejected } from "@/lib/utils/toast";
 import { AddressDisplay } from "./AddressDisplay";
-
-const METAMASK_INSTALL_URL = "https://metamask.io/download/";
 
 export function AccountPanel() {
   const {
     address,
     isConnected,
-    isMetaMaskInstalled,
-    isOnCorrectNetwork,
     isLoading,
-    connectWallet,
     disconnectWallet,
     switchWalletAccount,
   } = useWallet();
 
   const [isConnecting, setIsConnecting] = useState(false);
-  const [connectionError, setConnectionError] = useState("");
 
   const handleConnect = async () => {
-    if (!isMetaMaskInstalled) {
-      window.open(METAMASK_INSTALL_URL, "_blank");
-      return;
-    }
-
     try {
       setIsConnecting(true);
-      setConnectionError("");
-      await connectWallet();
-    } catch (err: any) {
-      setConnectionError(err.message || "Failed to connect to MetaMask");
-      if (err.message?.includes("rejected")) {
-        userRejected("Connection cancelled");
-      } else {
-        error("Failed to connect wallet", {
-          description: err.message || "Check your MetaMask and try again.",
-        });
-      }
+      await switchWalletAccount();
+    } catch {
+      // Error handled in WalletProvider
     } finally {
       setIsConnecting(false);
     }
   };
 
   if (!isConnected) {
-    return (
-      <button
-        onClick={handleConnect}
-        disabled={isLoading || isConnecting}
-        className="btn-primary flex items-center gap-2 text-sm"
-      >
-        <User className="w-4 h-4" />
-        {isConnecting ? "Connecting..." : "Connect Wallet"}
-      </button>
-    );
+    return null;
   }
 
   return (

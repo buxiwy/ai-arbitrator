@@ -8,27 +8,11 @@ export const wallets = [
     color: "#F6851B",
     downloadUrl: "https://metamask.io/download/",
     icon: (
-      <svg viewBox="0 0 318.6 318.6" className="w-8 h-8" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="mm-grad1" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#E2761B"/>
-            <stop offset="100%" stopColor="#CD6116"/>
-          </linearGradient>
-        </defs>
-        <path d="M274.1 35.5l-99.5 73.9L193 65.8z" fill="#E2761B"/>
-        <path d="M44.4 35.5l98.7 74.6-17.5-44.3zm193.9 171.3l-26.5 40.6 56.7 15.6 16.3-55.3zm-204.4-.9L50.1 183l56.7-15.6-26.5-40.6z" fill="#E4761B"/>
-        <path d="M103.6 138.2l-15.8 23.9 56.3.2v-46.4zm111.3 0l-15.8-23.9v46.4l56.2-.2zm114.6-52.2l-39-35.8-14.8 45.9 40.7-10.1zm-241.9-10.1l-14.8-45.9-39 35.8 43.8 10.1z" fill="#E4761B"/>
-        <path d="M57.8 213.5l32.4-15.9-22.1-20.5zm203 0l-10.2-20.5 32.3 15.9z" fill="#E4761B"/>
-        <path d="M108.7 97.8l-15.8 24 29.8-.4zm101.2 0l-14-24-15.8 24.4zm84.8 38.3l-29.8.4 28.2 20.6 26.5-20.2z" fill="#C0AD4E"/>
-        <path d="M108.7 97.8l-4.3 66.6 33.5-33.5zm101.2 0l29.5 33.1 33.5 33.5-4.6-66.3z" fill="#C0AD4E"/>
-        <path d="M177.7 176.9l-28.2-20.6h-42.5l28.2 20.6z" fill="#C0AD4E"/>
-        <path d="M86.2 265l28.8-14-24.9-20.7zm147.1 0l-3.8-34.6 25-20.8z" fill="#E4761B"/>
-        <path d="M242.3 97.8l-56.2.2 20.5 18.6 22.2-18.4z" fill="#E4761B"/>
-        <path d="M76.3 97.8l22 18.6 20.5-18.6-56.2-.2z" fill="#E4761B"/>
-        <path d="M105 154.5l-22.1-20.6H37.9l37.3 27.2zm163.6 0l37.3-27.2h-45l-22.2 20.6zm-100.6 22.4l20.7-20.6 20.8 20.6h-41.5z" fill="#D0811A"/>
-        <path d="M274.1 35.5l-48.3 36.3 45.6 20.8 40.4-28.4z" fill="#E4761B"/>
-        <path d="M44.4 35.5l-4 38.7 40.3 28.4 45.7-20.8z" fill="#E4761B"/>
-      </svg>
+      <div className="w-8 h-8 rounded-full bg-[#F6851B] flex items-center justify-center flex-shrink-0">
+        <svg viewBox="0 0 35 33" className="w-5 h-5" fill="#fff">
+          <path d="M32.96 1l-9.78 7.28 1.82 4.32-2.61-1.94-3.67 2.75 4.55 3.41 2.33 1.16 3.67-2.75 1.58 5.41-5.53 1.52-2.6-3.94-5.36 4.02-6.07-4.55.61 5.37-4.55 3.41-4.55-3.41-.61-5.37-6.07 4.55L12.1 5.64 8.43 2.89 4.76 5.64 2.43 3.88 0 1l9.78 7.28 1.82 4.32 2.61-1.94 3.67-2.75-4.55-3.41z"/>
+        </svg>
+      </div>
     ),
   },
   {
@@ -38,12 +22,13 @@ export const wallets = [
     color: "#000",
     downloadUrl: "https://www.okx.com/web3",
     icon: (
-      <svg viewBox="0 0 100 100" className="w-8 h-8" xmlns="http://www.w3.org/2000/svg">
-        <rect width="100" height="100" rx="20" fill="#000"/>
-        <circle cx="22" cy="50" r="11" fill="#fff"/>
-        <circle cx="50" cy="50" r="11" fill="#fff"/>
-        <circle cx="78" cy="50" r="11" fill="#fff"/>
-      </svg>
+      <div className="w-8 h-8 rounded-full bg-[#000] flex items-center justify-center flex-shrink-0">
+        <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none">
+          <circle cx="6" cy="12" r="2.5" fill="#fff"/>
+          <circle cx="12" cy="12" r="2.5" fill="#fff"/>
+          <circle cx="18" cy="12" r="2.5" fill="#fff"/>
+        </svg>
+      </div>
     ),
   },
   {
@@ -53,11 +38,12 @@ export const wallets = [
     color: "#0052FF",
     downloadUrl: "https://www.coinbase.com/wallet",
     icon: (
-      <svg viewBox="0 0 100 100" className="w-8 h-8" xmlns="http://www.w3.org/2000/svg">
-        <rect width="100" height="100" rx="20" fill="#0052FF"/>
-        <path d="M50 20C33.4 20 20 33.4 20 50s13.4 30 30 30 30-13.4 30-30S66.6 20 50 20zm0 50c-11 0-20-9-20-20s9-20 20-20 20 9 20 20-9 20-20 20z" fill="#fff"/>
-        <rect x="43" y="40" width="14" height="20" rx="2" fill="#fff"/>
-      </svg>
+      <div className="w-8 h-8 rounded-full bg-[#0052FF] flex items-center justify-center flex-shrink-0">
+        <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="#fff"/>
+          <path d="M14.5 8h-5v8h5c2.21 0 4-1.79 4-4s-1.79-4-4-4z" fill="#0052FF"/>
+        </svg>
+      </div>
     ),
   },
   {
@@ -67,12 +53,13 @@ export const wallets = [
     color: "#3B99FC",
     downloadUrl: "",
     icon: (
-      <svg viewBox="0 0 100 100" className="w-8 h-8" xmlns="http://www.w3.org/2000/svg">
-        <rect width="100" height="100" rx="20" fill="#3B99FC"/>
-        <path d="M35 38a8 8 0 018-8h0a8 8 0 018 8v24a8 8 0 01-8 8h0a8 8 0 01-8-8V38z" fill="#fff"/>
-        <path d="M65 38a8 8 0 018-8h0a8 8 0 018 8v24a8 8 0 01-8 8h0a8 8 0 01-8-8V38z" fill="#fff"/>
-        <path d="M49 46a8 8 0 018-8h0a8 8 0 018 8v16a8 8 0 01-8 8h0a8 8 0 01-8-8V46z" fill="#fff"/>
-      </svg>
+      <div className="w-8 h-8 rounded-full bg-[#3B99FC] flex items-center justify-center flex-shrink-0">
+        <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none">
+          <path d="M7 8a3 3 0 013-3h0a3 3 0 013 3v8a3 3 0 01-3 3h0a3 3 0 01-3-3V8z" fill="#fff"/>
+          <path d="M15 8a3 3 0 013-3h0a3 3 0 013 3v8a3 3 0 01-3 3h0a3 3 0 01-3-3V8z" fill="#fff"/>
+          <path d="M11 11a3 3 0 013-3h0a3 3 0 013 3v2a3 3 0 01-3 3h0a3 3 0 01-3-3v-2z" fill="#fff"/>
+        </svg>
+      </div>
     ),
   },
   {
@@ -82,13 +69,14 @@ export const wallets = [
     color: "#AB9FF2",
     downloadUrl: "https://phantom.app/",
     icon: (
-      <svg viewBox="0 0 100 100" className="w-8 h-8" xmlns="http://www.w3.org/2000/svg">
-        <rect width="100" height="100" rx="20" fill="#AB9FF2"/>
-        <path d="M50 20C33.4 20 20 33.4 20 50s13.4 30 30 30 30-13.4 30-30S66.6 20 50 20z" fill="#fff"/>
-        <circle cx="40" cy="45" r="5" fill="#AB9FF2"/>
-        <circle cx="60" cy="45" r="5" fill="#AB9FF2"/>
-        <path d="M38 60c0 0 5.5 8 12 8s12-8 12-8" stroke="#AB9FF2" strokeWidth="4" fill="none" strokeLinecap="round"/>
-      </svg>
+      <div className="w-8 h-8 rounded-full bg-[#AB9FF2] flex items-center justify-center flex-shrink-0">
+        <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="#fff"/>
+          <circle cx="9" cy="10" r="1.5" fill="#AB9FF2"/>
+          <circle cx="15" cy="10" r="1.5" fill="#AB9FF2"/>
+          <path d="M9 15c0 0 1.5 2 3 2s3-2 3-2" stroke="#AB9FF2" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+        </svg>
+      </div>
     ),
   },
 ];
