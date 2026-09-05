@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useDisputes, useDisputeCount, useUserDisputes } from "@/lib/hooks/useAIArbitrator";
+import { useDisputes, useDisputeCount } from "@/lib/hooks/useAIArbitrator";
 import { useWallet } from "@/lib/genlayer/WalletProvider";
 import { Shield, Clock, CheckCircle, AlertCircle, Gavel, FileText, Search, X } from "lucide-react";
 import type { Dispute } from "@/lib/contracts/types";
@@ -48,13 +48,13 @@ interface DisputesTableProps {
 }
 
 export function DisputesTable({ onSelectDispute, selectedId, filterByAddress }: DisputesTableProps) {
-  const { data: allDisputes = [], isLoading: isLoadingAll } = useDisputes();
-  const { data: userDisputes = [], isLoading: isLoadingUser } = useUserDisputes();
+  const { data: disputes = [], isLoading } = useDisputes();
   const { data: count = 0 } = useDisputeCount();
   const { address } = useWallet();
 
-  const disputes = filterByAddress ? userDisputes : allDisputes;
-  const isLoading = filterByAddress ? isLoadingUser : isLoadingAll;
+  const filteredByUser = filterByAddress && address
+    ? disputes.filter((d) => d.plaintiff === address || d.defendant === address)
+    : disputes;
 
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -62,7 +62,7 @@ export function DisputesTable({ onSelectDispute, selectedId, filterByAddress }: 
   const formatAddress = (addr: string) => `${addr?.slice(0, 6)}...${addr?.slice(-4)}`;
 
   const filteredDisputes = useMemo(() => {
-    return disputes.filter((dispute) => {
+    return filteredByUser.filter((dispute) => {
       const matchesSearch =
         searchQuery === "" ||
         dispute.title.toLowerCase().includes(searchQuery.toLowerCase()) ||

@@ -32,10 +32,9 @@ class Dispute:
 class AIArbitrator(gl.Contract):
     disputes: TreeMap[u256, Dispute]
     dispute_count: u256
-    user_disputes: TreeMap[str, DynArray[u256, 100]]
 
     def __init__(self):
-        self.dispute_count = u256(0)
+        self.dispute_count = 0
 
     @gl.public.write.payable
     def create_dispute(
@@ -45,7 +44,7 @@ class AIArbitrator(gl.Contract):
         description: str,
     ) -> u256:
         dispute_id = self.dispute_count
-        self.dispute_count += u256(1)
+        self.dispute_count += 1
 
         sender = gl.message.sender_address.as_hex
 
@@ -62,7 +61,6 @@ class AIArbitrator(gl.Contract):
             created_at="",
         )
         self.disputes[dispute_id] = dispute
-        self.user_disputes.get_or_insert_default(sender).append(dispute_id)
 
         return dispute_id
 
@@ -89,21 +87,6 @@ class AIArbitrator(gl.Contract):
         )
         dispute.evidence.append(evidence)
         dispute.state = "evidence_submitted"
-
-    @gl.public.write
-    def submit_arguments(
-        self,
-        dispute_id: u256,
-        plaintiff_args: str,
-        defendant_args: str,
-    ):
-        dispute = self.disputes[dispute_id]
-        if dispute.state not in ("open", "evidence_submitted"):
-            raise Exception("Dispute not accepting arguments")
-
-        sender = gl.message.sender_address.as_hex
-        if sender != dispute.plaintiff and sender != dispute.defendant:
-            raise Exception("Only parties can submit arguments")
 
     @gl.public.write
     def start_review(self, dispute_id: u256):
@@ -180,8 +163,3 @@ No other text. Only the JSON."""
     @gl.public.view
     def get_dispute_count(self) -> int:
         return int(self.dispute_count)
-
-    @gl.public.view
-    def get_user_disputes(self, user: str) -> list:
-        ids = self.user_disputes.get(user, [])
-        return [str(did) for did in ids]

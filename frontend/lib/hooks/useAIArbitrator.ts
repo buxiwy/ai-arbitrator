@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import AIArbitrator from "../contracts/AIArbitrator";
 import { getContractAddress, getStudioUrl } from "../genlayer/client";
 import { useWallet } from "../genlayer/wallet";
@@ -48,22 +48,6 @@ export function useDisputes() {
     refetchOnWindowFocus: true,
     staleTime: 2000,
     enabled: !!contract,
-  });
-}
-
-export function useUserDisputes() {
-  const contract = useAIArbitratorContract();
-  const { address } = useWallet();
-
-  return useQuery<Dispute[], Error>({
-    queryKey: ["userDisputes", address],
-    queryFn: () => {
-      if (!contract || !address) return Promise.resolve([]);
-      return contract.getUserDisputes(address);
-    },
-    refetchOnWindowFocus: true,
-    staleTime: 2000,
-    enabled: !!contract && !!address,
   });
 }
 
