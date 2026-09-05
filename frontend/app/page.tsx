@@ -7,16 +7,13 @@ import { DisputeDetail } from "@/components/DisputeDetail";
 import { CreateDisputeModal } from "@/components/CreateDisputeModal";
 import { HowItWorks } from "@/components/HowItWorks";
 import { StatsDashboard } from "@/components/StatsDashboard";
-import { WalletModal } from "@/components/WalletModal";
 import { useWallet } from "@/lib/genlayer/WalletProvider";
-import { wallets } from "@/lib/wallets";
 import { Scale, ArrowLeft, Wallet } from "lucide-react";
 
 export default function HomePage() {
   const [activeSection, setActiveSection] = useState("home");
   const [selectedDisputeId, setSelectedDisputeId] = useState<number | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showWalletModal, setShowWalletModal] = useState(false);
   const { address, isConnected, isLoading, connectToWallet, disconnectWallet } = useWallet();
 
   const handleNavigate = (section: string) => {
@@ -24,10 +21,9 @@ export default function HomePage() {
     setSelectedDisputeId(null);
   };
 
-  const handleSelectWallet = async (walletId: string) => {
+  const handleConnect = async () => {
     try {
-      await connectToWallet(walletId as any);
-      setShowWalletModal(false);
+      await connectToWallet("metamask");
     } catch (error) {
       console.error("Failed to connect:", error);
     }
@@ -104,10 +100,7 @@ export default function HomePage() {
       default:
         return (
           <div className="space-y-6">
-            {/* Stats */}
             <StatsDashboard />
-
-            {/* Main Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               <div className="lg:col-span-7">
                 <DisputesTable
@@ -126,16 +119,13 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen">
-      {/* Sidebar */}
       <Sidebar
         activeSection={activeSection}
         onNavigate={handleNavigate}
         onCreateDispute={() => setShowCreateModal(true)}
       />
 
-      {/* Main Content - Offset for sidebar */}
       <main className="ml-[240px] min-h-screen transition-all duration-300">
-        {/* Top Bar */}
         <header className="sticky top-0 z-30 brand-navbar">
           <div className="px-6 py-4">
             <div className="flex items-center justify-between">
@@ -161,7 +151,6 @@ export default function HomePage() {
                 </h1>
               </div>
 
-              {/* Wallet Connect */}
               {isConnected && address ? (
                 <div className="flex items-center gap-3">
                   <div className="text-sm text-muted-foreground bg-card/50 px-3 py-1.5 rounded-lg border border-border/50 font-mono">
@@ -176,7 +165,7 @@ export default function HomePage() {
                 </div>
               ) : (
                 <button
-                  onClick={() => setShowWalletModal(true)}
+                  onClick={handleConnect}
                   disabled={isLoading}
                   className="btn-primary flex items-center gap-2 text-sm"
                 >
@@ -188,24 +177,14 @@ export default function HomePage() {
           </div>
         </header>
 
-        {/* Page Content */}
         <div className="p-6">
           {renderContent()}
         </div>
       </main>
 
-      {/* Create Dispute Modal */}
       <CreateDisputeModal
         open={showCreateModal}
         onClose={() => setShowCreateModal(false)}
-      />
-
-      {/* Wallet Selection Modal */}
-      <WalletModal
-        open={showWalletModal}
-        onClose={() => setShowWalletModal(false)}
-        onSelectWallet={handleSelectWallet}
-        isConnecting={isLoading}
       />
     </div>
   );
