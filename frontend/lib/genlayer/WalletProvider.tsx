@@ -53,31 +53,6 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const savedWallet = localStorage.getItem(WALLET_KEY) as WalletId | null;
-      const walletsToTry: WalletId[] = savedWallet ? [savedWallet, "metamask", "okx", "coinbase", "phantom"] : ["metamask", "okx", "coinbase", "phantom"];
-
-      for (const walletId of walletsToTry) {
-        if (!isWalletInstalled(walletId)) continue;
-        try {
-          const accounts = await getAccountsForWallet(walletId);
-          if (accounts.length > 0) {
-            const chainId = await getCurrentChainIdForWallet(walletId);
-            const correctNetwork = await isOnGenLayerNetwork(walletId);
-            setState({
-              address: accounts[0],
-              chainId,
-              isConnected: true,
-              isLoading: false,
-              isOnCorrectNetwork: correctNetwork,
-              activeWallet: walletId,
-            });
-            return;
-          }
-        } catch {
-          continue;
-        }
-      }
-
       setState({ address: null, chainId: null, isConnected: false, isLoading: false, isOnCorrectNetwork: false, activeWallet: null });
     };
 
@@ -187,6 +162,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       localStorage.removeItem(WALLET_KEY);
     }
     setState({ address: null, chainId: null, isConnected: false, isLoading: false, isOnCorrectNetwork: false, activeWallet: null });
+    if (typeof window !== "undefined") {
+      window.location.reload();
+    }
   }, []);
 
   const switchWalletAccount = useCallback(async () => {

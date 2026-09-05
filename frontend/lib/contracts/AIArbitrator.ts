@@ -27,6 +27,10 @@ class AIArbitrator {
       config.endpoint = studioUrl;
     }
 
+    if (typeof window !== "undefined" && window.ethereum) {
+      config.provider = window.ethereum;
+    }
+
     this.client = createClient(config);
   }
 
@@ -38,6 +42,10 @@ class AIArbitrator {
 
     if (this.studioUrl) {
       config.endpoint = this.studioUrl;
+    }
+
+    if (typeof window !== "undefined" && window.ethereum) {
+      config.provider = window.ethereum;
     }
 
     this.client = createClient(config);

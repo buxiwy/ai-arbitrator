@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useDispute, useSubmitEvidence, useStartReview, useResolveDispute } from "@/lib/hooks/useAIArbitrator";
 import { useWallet } from "@/lib/genlayer/WalletProvider";
 import { ArrowLeft, Send, Play, Gavel, FileText, User, Clock, CheckCircle, AlertCircle, ChevronDown, ChevronUp } from "lucide-react";
@@ -39,10 +39,29 @@ export function DisputeDetail({ disputeId, onBack }: DisputeDetailProps) {
   const [evidenceData, setEvidenceData] = useState("");
   const [showEvidenceForm, setShowEvidenceForm] = useState(false);
   const [expandedEvidence, setExpandedEvidence] = useState<number | null>(null);
+  const [showTypeDropdown, setShowTypeDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const isParty = address && (dispute?.plaintiff === address || dispute?.defendant === address);
-  const isPlaintiff = address && dispute?.plaintiff === address;
-  const isDefendant = address && dispute?.defendant === address;
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowTypeDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const evidenceTypes = [
+    { value: "text", label: "Text", icon: "📄" },
+    { value: "url", label: "URL", icon: "🔗" },
+    { value: "image", label: "Image", icon: "🖼️" },
+    { value: "document", label: "Document", icon: "📋" },
+  ];
+
+  const isParty = address && (dispute?.plaintiff?.toLowerCase() === address?.toLowerCase() || dispute?.defendant?.toLowerCase() === address?.toLowerCase());
+  const isPlaintiff = address && dispute?.plaintiff?.toLowerCase() === address?.toLowerCase();
+  const isDefendant = address && dispute?.defendant?.toLowerCase() === address?.toLowerCase();
 
   const formatAddress = (addr: string) => `${addr?.slice(0, 6)}...${addr?.slice(-4)}`;
 
@@ -191,6 +210,79 @@ export function DisputeDetail({ disputeId, onBack }: DisputeDetailProps) {
         </div>
       )}
 
+      {/* Submit Evidence Button - Prominent */}
+      {isParty && dispute.state !== "decided" && dispute.state !== "under_review" && (
+        <button
+          onClick={() => setShowEvidenceForm(true)}
+          className="w-full py-4 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-all"
+          style={{
+            background: "linear-gradient(135deg, rgba(255,200,50,0.15) 0%, rgba(255,200,50,0.08) 100%)",
+            border: "1px solid rgba(255,200,50,0.3)",
+            color: "rgba(255,200,50,0.9)",
+          }}
+        >
+          <Send className="w-4 h-4" />
+          Submit Evidence
+        </button>
+      )}
+
+      {/* Evidence Form */}
+      {showEvidenceForm && isParty && dispute.state !== "decided" && (
+        <form onSubmit={handleSubmitEvidence} className="p-4 rounded-xl space-y-3" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.08)" }}>
+          <div className="flex gap-2">
+            <div className="relative" ref={dropdownRef}>
+              <button
+                type="button"
+                onClick={() => setShowTypeDropdown(!showTypeDropdown)}
+                className="rounded-lg px-3 py-2 text-sm text-white/70 focus:outline-none flex items-center gap-2 min-w-[120px]"
+                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}
+              >
+                <span>{evidenceTypes.find(t => t.value === evidenceType)?.icon}</span>
+                <span>{evidenceTypes.find(t => t.value === evidenceType)?.label}</span>
+                <ChevronDown className="w-3 h-3 ml-auto text-white/30" />
+              </button>
+              {showTypeDropdown && (
+                <div className="absolute top-full left-0 mt-1 w-full rounded-lg z-50 overflow-hidden" style={{ background: "#1a1a2e", border: "1px solid rgba(255,255,255,0.1)" }}>
+                  {evidenceTypes.map((type) => (
+                    <button
+                      key={type.value}
+                      type="button"
+                      onClick={() => { setEvidenceType(type.value); setShowTypeDropdown(false); }}
+                      className="w-full px-3 py-2 text-sm text-left flex items-center gap-2 transition-colors"
+                      style={{
+                        background: evidenceType === type.value ? "rgba(255,200,50,0.1)" : "transparent",
+                        color: evidenceType === type.value ? "rgba(255,200,50,0.9)" : "rgba(255,255,255,0.6)",
+                      }}
+                      onMouseEnter={(e) => { if (evidenceType !== type.value) e.currentTarget.style.background = "rgba(255,255,255,0.05)"; }}
+                      onMouseLeave={(e) => { if (evidenceType !== type.value) e.currentTarget.style.background = "transparent"; }}
+                    >
+                      <span>{type.icon}</span>
+                      <span>{type.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <input
+              type="text"
+              value={evidenceData}
+              onChange={(e) => setEvidenceData(e.target.value)}
+              placeholder="Enter evidence data..."
+              className="flex-1 rounded-lg px-3 py-2 text-sm text-white/70 placeholder:text-white/20 focus:outline-none"
+              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}
+              required
+            />
+          </div>
+          <div className="flex justify-end gap-2">
+            <button type="button" onClick={() => setShowEvidenceForm(false)} className="btn-secondary text-xs">Cancel</button>
+            <button type="submit" disabled={isSubmittingEvidence || !evidenceData} className="btn-primary text-xs flex items-center gap-1">
+              <Send className="w-3 h-3" />
+              {isSubmittingEvidence ? "Submitting..." : "Submit"}
+            </button>
+          </div>
+        </form>
+      )}
+
       {/* Evidence Timeline */}
       <div>
         <div className="flex items-center justify-between mb-4">
@@ -201,62 +293,13 @@ export function DisputeDetail({ disputeId, onBack }: DisputeDetailProps) {
               {dispute.evidence.length}
             </span>
           </div>
-          {isParty && dispute.state !== "decided" && (
-            <button
-              onClick={() => setShowEvidenceForm(!showEvidenceForm)}
-              className="text-xs text-white/40 hover:text-white/60 transition-colors flex items-center gap-1"
-            >
-              {showEvidenceForm ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-              {showEvidenceForm ? "Hide" : "Submit Evidence"}
-            </button>
-          )}
         </div>
-
-        {/* Evidence Form */}
-        {showEvidenceForm && isParty && dispute.state !== "decided" && (
-          <form onSubmit={handleSubmitEvidence} className="mb-4 p-4 rounded-xl space-y-3" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.08)" }}>
-            <div className="flex gap-2">
-              <select
-                value={evidenceType}
-                onChange={(e) => setEvidenceType(e.target.value)}
-                className="rounded-lg px-3 py-2 text-sm text-white/70 focus:outline-none"
-                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}
-              >
-                <option value="text">Text</option>
-                <option value="url">URL</option>
-                <option value="image">Image</option>
-                <option value="document">Document</option>
-              </select>
-              <input
-                type="text"
-                value={evidenceData}
-                onChange={(e) => setEvidenceData(e.target.value)}
-                placeholder="Enter evidence data..."
-                className="flex-1 rounded-lg px-3 py-2 text-sm text-white/70 placeholder:text-white/20 focus:outline-none"
-                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}
-                required
-              />
-            </div>
-            <div className="flex justify-end gap-2">
-              <button type="button" onClick={() => setShowEvidenceForm(false)} className="btn-secondary text-xs">Cancel</button>
-              <button type="submit" disabled={isSubmittingEvidence || !evidenceData} className="btn-primary text-xs flex items-center gap-1">
-                <Send className="w-3 h-3" />
-                {isSubmittingEvidence ? "Submitting..." : "Submit"}
-              </button>
-            </div>
-          </form>
-        )}
 
         {/* Evidence List */}
         {dispute.evidence.length === 0 ? (
           <div className="text-center py-8 rounded-xl" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }}>
             <FileText className="w-8 h-8 mx-auto mb-2 text-white/10" />
             <p className="text-sm text-white/25">No evidence submitted yet</p>
-            {isParty && dispute.state !== "decided" && (
-              <button onClick={() => setShowEvidenceForm(true)} className="text-xs text-white/40 hover:text-white/60 mt-2 transition-colors">
-                Be the first to submit evidence
-              </button>
-            )}
           </div>
         ) : (
           <div className="space-y-2">

@@ -1,120 +1,83 @@
 # { "Depends": "py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6" }
 
 import json
-from dataclasses import dataclass
 from genlayer import *
 
 
-@allow_storage
-@dataclass
-class Evidence:
-    submitter: str
-    evidence_type: str
-    data: str
-    timestamp: str
-
-
-@allow_storage
-@dataclass
-class Dispute:
-    id: u256
-    plaintiff: str
-    defendant: str
-    title: str
-    description: str
-    evidence: DynArray[Evidence, 20]
-    state: str
-    verdict: str
-    explanation: str
-    created_at: str
-
-
 class AIArbitrator(gl.Contract):
-    disputes: TreeMap[u256, Dispute]
     dispute_count: u256
+    dispute_plaintiff: TreeMap[u256, str]
+    dispute_defendant: TreeMap[u256, str]
+    dispute_title: TreeMap[u256, str]
+    dispute_description: TreeMap[u256, str]
+    dispute_state: TreeMap[u256, str]
+    dispute_verdict: TreeMap[u256, str]
+    dispute_explanation: TreeMap[u256, str]
+    evidence_count: TreeMap[u256, u256]
+    evidence_submitter: TreeMap[str, str]
+    evidence_type: TreeMap[str, str]
+    evidence_data: TreeMap[str, str]
 
     def __init__(self):
         self.dispute_count = 0
 
     @gl.public.write.payable
-    def create_dispute(
-        self,
-        defendant: str,
-        title: str,
-        description: str,
-    ) -> u256:
+    def create_dispute(self, defendant: str, title: str, description: str) -> u256:
         dispute_id = self.dispute_count
         self.dispute_count += 1
-
-        sender = gl.message.sender_address.as_hex
-
-        dispute = Dispute(
-            id=dispute_id,
-            plaintiff=sender,
-            defendant=defendant,
-            title=title,
-            description=description,
-            evidence=[],
-            state="open",
-            verdict="",
-            explanation="",
-            created_at="",
-        )
-        self.disputes[dispute_id] = dispute
-
+        sender = gl.message.sender_address.as_hex.lower()
+        self.dispute_plaintiff[dispute_id] = sender
+        self.dispute_defendant[dispute_id] = defendant.lower()
+        self.dispute_title[dispute_id] = title
+        self.dispute_description[dispute_id] = description
+        self.dispute_state[dispute_id] = "open"
+        self.dispute_verdict[dispute_id] = ""
+        self.dispute_explanation[dispute_id] = ""
+        self.evidence_count[dispute_id] = 0
         return dispute_id
 
     @gl.public.write
-    def submit_evidence(
-        self,
-        dispute_id: u256,
-        evidence_type: str,
-        data: str,
-    ):
-        dispute = self.disputes[dispute_id]
-        if dispute.state not in ("open", "evidence_submitted"):
+    def submit_evidence(self, dispute_id: u256, evidence_type: str, data: str):
+        state = self.dispute_state[dispute_id]
+        if state not in ("open", "evidence_submitted"):
             raise Exception("Dispute not accepting evidence")
-
-        sender = gl.message.sender_address.as_hex
-        if sender != dispute.plaintiff and sender != dispute.defendant:
+        sender = gl.message.sender_address.as_hex.lower()
+        if sender != self.dispute_plaintiff[dispute_id] and sender != self.dispute_defendant[dispute_id]:
             raise Exception("Only parties can submit evidence")
-
-        evidence = Evidence(
-            submitter=sender,
-            evidence_type=evidence_type,
-            data=data,
-            timestamp="",
-        )
-        dispute.evidence.append(evidence)
-        dispute.state = "evidence_submitted"
+        ev_id = self.evidence_count[dispute_id]
+        key_prefix = f"{dispute_id}_{ev_id}"
+        self.evidence_submitter[key_prefix] = sender
+        self.evidence_type[key_prefix] = evidence_type
+        self.evidence_data[key_prefix] = data
+        self.evidence_count[dispute_id] = ev_id + 1
+        self.dispute_state[dispute_id] = "evidence_submitted"
 
     @gl.public.write
     def start_review(self, dispute_id: u256):
-        dispute = self.disputes[dispute_id]
-        if dispute.state != "evidence_submitted":
+        state = self.dispute_state[dispute_id]
+        if state != "evidence_submitted":
             raise Exception("Must submit evidence before review")
-
-        sender = gl.message.sender_address.as_hex
-        if sender != dispute.plaintiff:
+        sender = gl.message.sender_address.as_hex.lower()
+        if sender != self.dispute_plaintiff[dispute_id]:
             raise Exception("Only plaintiff can start review")
-
-        dispute.state = "under_review"
+        self.dispute_state[dispute_id] = "under_review"
 
     @gl.public.write
     def resolve_dispute(self, dispute_id: u256) -> str:
-        dispute = self.disputes[dispute_id]
-        if dispute.state != "under_review":
+        state = self.dispute_state[dispute_id]
+        if state != "under_review":
             raise Exception("Dispute not under review")
-
+        ev_count = self.evidence_count[dispute_id]
         evidence_text = ""
-        for i in range(len(dispute.evidence)):
-            ev = dispute.evidence[i]
-            evidence_text += f"#{i+1} [{ev.evidence_type}] from {ev.submitter}: {ev.data}\n"
-
+        for i in range(ev_count):
+            key_prefix = f"{dispute_id}_{i}"
+            evidence_text += f"#{i+1} [{self.evidence_type[key_prefix]}] from {self.evidence_submitter[key_prefix]}: {self.evidence_data[key_prefix]}\n"
+        title = self.dispute_title[dispute_id]
+        description = self.dispute_description[dispute_id]
         prompt = f"""You are an impartial AI judge in a decentralized dispute resolution system.
 
-DISPUTE: {dispute.title}
-DESCRIPTION: {dispute.description}
+DISPUTE: {title}
+DESCRIPTION: {description}
 
 EVIDENCE:
 {evidence_text}
@@ -125,39 +88,35 @@ You MUST respond with ONLY a JSON object, nothing else:
 {{"verdict": "PLAINTIFF_WINS" or "DEFENDANT_WINS" or "SPLIT" or "DISMISSED", "explanation": "brief explanation"}}
 
 No other text. Only the JSON."""
-
         result = gl.nondet.exec_prompt(prompt, response_format="json")
-
         verdict = result.get("verdict", "DISMISSED")
         explanation = result.get("explanation", "No explanation provided")
-
-        dispute.verdict = verdict
-        dispute.explanation = explanation
-        dispute.state = "decided"
-
+        self.dispute_verdict[dispute_id] = verdict
+        self.dispute_explanation[dispute_id] = explanation
+        self.dispute_state[dispute_id] = "decided"
         return json.dumps({"verdict": verdict, "explanation": explanation})
 
     @gl.public.view
     def get_dispute(self, dispute_id: u256) -> dict:
-        dispute = self.disputes[dispute_id]
+        ev_count = self.evidence_count[dispute_id]
         evidence_list = []
-        for i in range(len(dispute.evidence)):
-            ev = dispute.evidence[i]
+        for i in range(ev_count):
+            key_prefix = f"{dispute_id}_{i}"
             evidence_list.append({
-                "submitter": ev.submitter,
-                "evidence_type": ev.evidence_type,
-                "data": ev.data,
+                "submitter": self.evidence_submitter[key_prefix],
+                "evidence_type": self.evidence_type[key_prefix],
+                "data": self.evidence_data[key_prefix],
             })
         return {
-            "id": str(dispute.id),
-            "plaintiff": dispute.plaintiff,
-            "defendant": dispute.defendant,
-            "title": dispute.title,
-            "description": dispute.description,
+            "id": str(dispute_id),
+            "plaintiff": self.dispute_plaintiff[dispute_id],
+            "defendant": self.dispute_defendant[dispute_id],
+            "title": self.dispute_title[dispute_id],
+            "description": self.dispute_description[dispute_id],
             "evidence": evidence_list,
-            "state": dispute.state,
-            "verdict": dispute.verdict,
-            "explanation": dispute.explanation,
+            "state": self.dispute_state[dispute_id],
+            "verdict": self.dispute_verdict[dispute_id],
+            "explanation": self.dispute_explanation[dispute_id],
         }
 
     @gl.public.view
