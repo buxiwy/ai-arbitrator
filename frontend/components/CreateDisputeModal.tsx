@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useCreateDispute } from "@/lib/hooks/useAIArbitrator";
+import { useWallet } from "@/lib/genlayer/WalletProvider";
 import { X, AlertCircle, CheckCircle, Scale } from "lucide-react";
 
 interface CreateDisputeModalProps {
@@ -15,9 +16,10 @@ export function CreateDisputeModal({ open, onClose }: CreateDisputeModalProps) {
   const [description, setDescription] = useState("");
   const [step, setStep] = useState(1);
   const { createDispute, isPending } = useCreateDispute();
+  const { address } = useWallet();
 
   const isValidAddress = (addr: string) => /^0x[a-fA-F0-9]{40}$/.test(addr);
-  const isAddressValid = isValidAddress(defendant);
+  const isAddressValid = isValidAddress(defendant) && defendant.toLowerCase() !== address?.toLowerCase();
   const isTitleValid = title.trim().length >= 5;
   const isDescriptionValid = description.trim().length >= 20;
 
@@ -88,9 +90,14 @@ export function CreateDisputeModal({ open, onClose }: CreateDisputeModalProps) {
                   style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}
                   autoFocus
                 />
-                {defendant && !isAddressValid && (
+                {defendant && !isValidAddress(defendant) && (
                   <p className="text-xs text-red-400/80 mt-2 flex items-center gap-1">
                     <AlertCircle className="w-3 h-3" /> Invalid Ethereum address format
+                  </p>
+                )}
+                {defendant && isValidAddress(defendant) && defendant.toLowerCase() === address?.toLowerCase() && (
+                  <p className="text-xs text-red-400/80 mt-2 flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" /> Cannot dispute yourself
                   </p>
                 )}
                 {defendant && isAddressValid && (

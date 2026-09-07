@@ -6,7 +6,7 @@ import AIArbitrator from "../contracts/AIArbitrator";
 import { getContractAddress, getStudioUrl } from "../genlayer/client";
 import { useWallet } from "../genlayer/wallet";
 import { success, error } from "../utils/toast";
-import type { Dispute } from "../contracts/types";
+import type { Dispute, Stats } from "../contracts/types";
 
 export function useAIArbitratorContract(): AIArbitrator | null {
   const { address } = useWallet();
@@ -31,7 +31,8 @@ export function useDisputeCount() {
       return contract.getDisputeCount();
     },
     refetchOnWindowFocus: true,
-    staleTime: 2000,
+    staleTime: 10000,
+    refetchInterval: 5000,
     enabled: !!contract,
   });
 }
@@ -46,8 +47,26 @@ export function useDisputes() {
       return contract.getAllDisputes();
     },
     refetchOnWindowFocus: true,
-    staleTime: 2000,
+    staleTime: 10000,
+    refetchInterval: 5000,
     enabled: !!contract,
+  });
+}
+
+export function useUserDisputes() {
+  const contract = useAIArbitratorContract();
+  const { address } = useWallet();
+
+  return useQuery<Dispute[], Error>({
+    queryKey: ["userDisputes", address],
+    queryFn: () => {
+      if (!contract || !address) return Promise.resolve([]);
+      return contract.getUserDisputes(address);
+    },
+    refetchOnWindowFocus: true,
+    staleTime: 10000,
+    refetchInterval: 5000,
+    enabled: !!contract && !!address,
   });
 }
 
@@ -61,7 +80,8 @@ export function useDispute(id: number) {
       return contract.getDispute(id);
     },
     enabled: !!contract && !isNaN(id),
-    staleTime: 2000,
+    staleTime: 10000,
+    refetchInterval: 5000,
   });
 }
 
@@ -87,6 +107,8 @@ export function useCreateDispute() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["disputes"] });
       queryClient.invalidateQueries({ queryKey: ["disputeCount"] });
+      queryClient.invalidateQueries({ queryKey: ["userDisputes"] });
+      queryClient.invalidateQueries({ queryKey: ["stats"] });
       success("Dispute created!", {
         description: "Your dispute has been submitted to the blockchain.",
       });
@@ -203,5 +225,50 @@ export function useResolveDispute() {
     ...mutation,
     resolveDispute: mutation.mutate,
     resolveDisputeAsync: mutation.mutateAsync,
+  };
+}
+
+export function useStats() {
+  const contract = useAIArbitratorContract();
+
+  return useQuery<Stats | null, Error>({
+    queryKey: ["stats"],
+    queryFn: () => {
+      if (!contract) return Promise.resolve(null);
+      return contract.getStats();
+    },
+    refetchOnWindowFocus: true,
+    staleTime: 10000,
+    refetchInterval: 5000,
+    enabled: !!contract,
+  });
+}
+
+export function useCheckTimeout() {
+  const contract = useAIArbitratorContract();
+  const { address } = useWallet();
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: async (disputeId: number) => {
+      if (!contract) throw new Error("Contract not configured");
+      if (!address) throw new Error("Wallet not connected");
+      return contract.checkTimeout(disputeId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["disputes"] });
+      queryClient.invalidateQueries({ queryKey: ["stats"] });
+    },
+    onError: (err: any) => {
+      error("Failed to check timeout", {
+        description: err?.message || "Please try again.",
+      });
+    },
+  });
+
+  return {
+    ...mutation,
+    checkTimeout: mutation.mutate,
+    checkTimeoutAsync: mutation.mutateAsync,
   };
 }

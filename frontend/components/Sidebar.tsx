@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useWallet } from "@/lib/genlayer/WalletProvider";
+import { useNotifications } from "@/lib/hooks/useNotifications";
 import {
   Scale,
   Home,
@@ -37,6 +38,7 @@ const externalLinks = [
 export function Sidebar({ activeSection, onNavigate, onCreateDispute }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const { address, isConnected, disconnectWallet } = useWallet();
+  const { count: notificationCount } = useNotifications();
 
   const formatAddress = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 
@@ -121,8 +123,18 @@ export function Sidebar({ activeSection, onNavigate, onCreateDispute }: SidebarP
                 }
               }}
             >
-              <item.icon className="w-4 h-4 flex-shrink-0" />
+              <div className="relative">
+                <item.icon className="w-4 h-4 flex-shrink-0" />
+                {item.id === "disputes" && notificationCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full" style={{ background: "rgba(255,100,100,0.9)" }} />
+                )}
+              </div>
               {!collapsed && <span>{item.label}</span>}
+              {!collapsed && item.id === "disputes" && notificationCount > 0 && (
+                <span className="ml-auto px-1.5 py-0.5 rounded-full text-[10px] font-bold" style={{ background: "rgba(255,100,100,0.2)", color: "rgba(255,100,100,0.9)", border: "1px solid rgba(255,100,100,0.3)" }}>
+                  {notificationCount}
+                </span>
+              )}
             </button>
           ))}
         </nav>

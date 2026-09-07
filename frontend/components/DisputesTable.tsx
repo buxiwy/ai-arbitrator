@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useDisputes, useDisputeCount } from "@/lib/hooks/useAIArbitrator";
+import { useDisputes, useUserDisputes, useDisputeCount } from "@/lib/hooks/useAIArbitrator";
 import { useWallet } from "@/lib/genlayer/WalletProvider";
 import { Shield, Clock, CheckCircle, AlertCircle, Gavel, FileText, Search, X } from "lucide-react";
 import type { Dispute } from "@/lib/contracts/types";
@@ -48,13 +48,13 @@ interface DisputesTableProps {
 }
 
 export function DisputesTable({ onSelectDispute, selectedId, filterByAddress }: DisputesTableProps) {
-  const { data: disputes = [], isLoading } = useDisputes();
+  const { data: allDisputes = [], isLoading } = useDisputes();
+  const { data: userDisputes = [], isLoading: isLoadingUser } = useUserDisputes();
   const { data: count = 0 } = useDisputeCount();
   const { address } = useWallet();
 
-  const filteredByUser = filterByAddress && address
-    ? disputes.filter((d) => d.plaintiff === address || d.defendant === address)
-    : disputes;
+  const disputes = filterByAddress ? userDisputes : allDisputes;
+  const isLoadingResult = filterByAddress ? isLoadingUser : isLoading;
 
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -62,7 +62,7 @@ export function DisputesTable({ onSelectDispute, selectedId, filterByAddress }: 
   const formatAddress = (addr: string) => `${addr?.slice(0, 6)}...${addr?.slice(-4)}`;
 
   const filteredDisputes = useMemo(() => {
-    return filteredByUser.filter((dispute) => {
+    return disputes.filter((dispute) => {
       const matchesSearch =
         searchQuery === "" ||
         dispute.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -82,7 +82,7 @@ export function DisputesTable({ onSelectDispute, selectedId, filterByAddress }: 
     decided: disputes.filter((d) => d.state === "decided").length,
   }), [disputes]);
 
-  if (isLoading) {
+  if (isLoadingResult) {
     return (
       <div className="brand-card p-6">
         <div className="flex items-center gap-2 mb-4">

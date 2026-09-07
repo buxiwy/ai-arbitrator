@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useDispute, useSubmitEvidence, useStartReview, useResolveDispute } from "@/lib/hooks/useAIArbitrator";
+import { useDispute, useSubmitEvidence, useStartReview, useResolveDispute, useCheckTimeout } from "@/lib/hooks/useAIArbitrator";
 import { useWallet } from "@/lib/genlayer/WalletProvider";
 import { ArrowLeft, Send, Play, Gavel, FileText, User, Clock, CheckCircle, AlertCircle, ChevronDown, ChevronUp } from "lucide-react";
 
@@ -34,6 +34,7 @@ export function DisputeDetail({ disputeId, onBack }: DisputeDetailProps) {
   const { submitEvidence, isPending: isSubmittingEvidence } = useSubmitEvidence();
   const { startReview, isPending: isStartingReview } = useStartReview();
   const { resolveDispute, isPending: isResolving } = useResolveDispute();
+  const { checkTimeout, isPending: isCheckingTimeout } = useCheckTimeout();
 
   const [evidenceType, setEvidenceType] = useState("text");
   const [evidenceData, setEvidenceData] = useState("");
@@ -62,6 +63,19 @@ export function DisputeDetail({ disputeId, onBack }: DisputeDetailProps) {
   const isParty = address && (dispute?.plaintiff?.toLowerCase() === address?.toLowerCase() || dispute?.defendant?.toLowerCase() === address?.toLowerCase());
   const isPlaintiff = address && dispute?.plaintiff?.toLowerCase() === address?.toLowerCase();
   const isDefendant = address && dispute?.defendant?.toLowerCase() === address?.toLowerCase();
+
+  const formatDeadline = (ts: number) => {
+    if (!ts) return "";
+    const d = new Date(ts * 1000);
+    const now = new Date();
+    const diff = d.getTime() - now.getTime();
+    if (diff <= 0) return "Expired";
+    const days = Math.floor(diff / 86400000);
+    const hours = Math.floor((diff % 86400000) / 3600000);
+    return `${days}d ${hours}h remaining`;
+  };
+
+  const isExpired = dispute?.deadline ? Date.now() / 1000 > dispute.deadline : false;
 
   const formatAddress = (addr: string) => `${addr?.slice(0, 6)}...${addr?.slice(-4)}`;
 
@@ -183,6 +197,23 @@ export function DisputeDetail({ disputeId, onBack }: DisputeDetailProps) {
           </div>
         ))}
       </div>
+
+      {/* Deadline */}
+      {dispute.deadline > 0 && dispute.state !== "decided" && (
+        <div className="rounded-xl p-4 flex items-center justify-between" style={{ background: isExpired ? "rgba(255,100,100,0.06)" : "rgba(255,255,255,0.02)", border: `1px solid ${isExpired ? "rgba(255,100,100,0.15)" : "rgba(255,255,255,0.06)"}` }}>
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4" style={{ color: isExpired ? "rgba(255,100,100,0.8)" : "rgba(255,200,50,0.7)" }} />
+            <span className="text-sm" style={{ color: isExpired ? "rgba(255,100,100,0.8)" : "rgba(255,200,50,0.8)" }}>
+              {formatDeadline(dispute.deadline)}
+            </span>
+          </div>
+          {isExpired && isParty && (
+            <button onClick={() => checkTimeout(disputeId)} disabled={isCheckingTimeout} className="text-xs px-3 py-1.5 rounded-lg transition-all" style={{ background: "rgba(255,100,100,0.1)", border: "1px solid rgba(255,100,100,0.2)", color: "rgba(255,100,100,0.9)" }}>
+              {isCheckingTimeout ? "Processing..." : "Claim Timeout"}
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Description */}
       <div>
@@ -320,7 +351,21 @@ export function DisputeDetail({ disputeId, onBack }: DisputeDetailProps) {
                             <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.5)" }}>Yours</span>
                           )}
                         </div>
-                        <p className={`text-sm text-white/60 ${expandedEvidence === i ? "" : "line-clamp-2"}`}>{ev.data}</p>
+                        {ev.evidence_type === "url" ? (
+                          <a href={ev.data} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-400/80 hover:text-blue-300/80 underline break-all">{ev.data}</a>
+                        ) : ev.evidence_type === "document" ? (
+                          <pre className={`text-sm text-white/60 font-mono whitespace-pre-wrap rounded-lg p-3 ${expandedEvidence === i ? "" : "line-clamp-3"}`} style={{ background: "rgba(255,255,255,0.03)" }}>{ev.data}</pre>
+                        ) : ev.evidence_type === "image" ? (
+                          <div className={`${expandedEvidence === i ? "" : "max-h-32 overflow-hidden"} rounded-lg overflow-hidden`}>
+                            {ev.data.match(/\.(jpg|jpeg|png|gif|webp)/i) ? (
+                              <img src={ev.data} alt="Evidence" className="w-full h-auto" />
+                            ) : (
+                              <p className="text-sm text-white/60 break-all">{ev.data}</p>
+                            )}
+                          </div>
+                        ) : (
+                          <p className={`text-sm text-white/60 ${expandedEvidence === i ? "" : "line-clamp-2"}`}>{ev.data}</p>
+                        )}
                       </div>
                     </div>
                     <span className="text-[10px] text-white/20">#{i + 1}</span>

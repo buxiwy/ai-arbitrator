@@ -28,9 +28,17 @@ A decentralized platform where AI judges evaluate evidence and deliver fair verd
 ## Key features
 - Non-deterministic AI evaluation (each validator runs independently)
 - Structured JSON verdicts (PLAINTIFF_WINS / DEFENDANT_WINS / SPLIT / DISMISSED)
-- Full evidence tracking on-chain
+- Full evidence tracking on-chain with type formatting (text/URL/image/document)
+- Address validation + duplicate prevention
+- 7-day deadline with timeout auto-judgment
+- Per-wallet dispute tracking
+- On-chain statistics dashboard
 - MetaMask wallet integration
 - Responsive dark-mode UI
+
+## Contract
+- Address: `0xFF693B73f863eC7527859ddc3471B02865207D64`
+- Network: GenLayer Studio
 
 ## Why GenLayer?
 GenLayer's Intelligent Contracts natively access LLMs. This lets the smart contract itself become the judge — reading evidence, understanding context, and rendering verdicts without oracles or off-chain computation.

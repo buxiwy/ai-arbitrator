@@ -1,6 +1,6 @@
 import { createClient } from "genlayer-js";
 import { studionet } from "genlayer-js/chains";
-import type { Dispute, TransactionReceipt } from "./types";
+import type { Dispute, Stats, TransactionReceipt } from "./types";
 
 class AIArbitrator {
   private contractAddress: `0x${string}`;
@@ -106,6 +106,29 @@ class AIArbitrator {
     }
   }
 
+  async getUserDisputes(address: string): Promise<Dispute[]> {
+    try {
+      const ids: bigint[] = await this.client.readContract({
+        address: this.contractAddress,
+        functionName: "get_user_disputes",
+        args: [address],
+      });
+
+      const disputes: Dispute[] = [];
+      for (const id of ids) {
+        const dispute = await this.getDispute(Number(id));
+        if (dispute) {
+          disputes.push(dispute);
+        }
+      }
+
+      return disputes.reverse();
+    } catch (error) {
+      console.error("Error fetching user disputes:", error);
+      return [];
+    }
+  }
+
   async getAllDisputes(): Promise<Dispute[]> {
     try {
       const count = await this.getDisputeCount();
@@ -140,8 +163,7 @@ class AIArbitrator {
 
       const receipt = await this.client.waitForTransactionReceipt({
         hash: txHash,
-        status: "ACCEPTED" as any,
-        retries: 24,
+        retries: 30,
         interval: 5000,
       });
 
@@ -167,8 +189,7 @@ class AIArbitrator {
 
       const receipt = await this.client.waitForTransactionReceipt({
         hash: txHash,
-        status: "ACCEPTED" as any,
-        retries: 24,
+        retries: 30,
         interval: 5000,
       });
 
@@ -190,8 +211,7 @@ class AIArbitrator {
 
       const receipt = await this.client.waitForTransactionReceipt({
         hash: txHash,
-        status: "ACCEPTED" as any,
-        retries: 24,
+        retries: 30,
         interval: 5000,
       });
 
@@ -213,8 +233,7 @@ class AIArbitrator {
 
       const receipt = await this.client.waitForTransactionReceipt({
         hash: txHash,
-        status: "ACCEPTED" as any,
-        retries: 24,
+        retries: 30,
         interval: 5000,
       });
 
@@ -222,6 +241,53 @@ class AIArbitrator {
     } catch (error) {
       console.error("Error resolving dispute:", error);
       throw new Error("Failed to resolve dispute");
+    }
+  }
+
+  async checkTimeout(disputeId: number): Promise<TransactionReceipt> {
+    try {
+      const txHash = await this.client.writeContract({
+        address: this.contractAddress,
+        functionName: "check_timeout",
+        args: [BigInt(disputeId)],
+        value: BigInt(0),
+      });
+
+      const receipt = await this.client.waitForTransactionReceipt({
+        hash: txHash,
+        retries: 30,
+        interval: 5000,
+      });
+
+      return receipt as TransactionReceipt;
+    } catch (error) {
+      console.error("Error checking timeout:", error);
+      throw new Error("Failed to check timeout");
+    }
+  }
+
+  async getStats(): Promise<Stats | null> {
+    try {
+      const result: any = await this.client.readContract({
+        address: this.contractAddress,
+        functionName: "get_stats",
+        args: [],
+      });
+
+      if (result instanceof Map) {
+        return Array.from(result.entries()).reduce(
+          (acc: any, [key, value]: any) => {
+            acc[key] = value;
+            return acc;
+          },
+          {}
+        ) as Stats;
+      }
+
+      return result as Stats;
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+      return null;
     }
   }
 }

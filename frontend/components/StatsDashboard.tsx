@@ -1,21 +1,22 @@
 "use client";
 
-import { useDisputes } from "@/lib/hooks/useAIArbitrator";
+import { useDisputes, useStats } from "@/lib/hooks/useAIArbitrator";
 import { Scale, Clock, FileText, Gavel, CheckCircle, TrendingUp } from "lucide-react";
 
 export function StatsDashboard() {
   const { data: disputes = [] } = useDisputes();
+  const { data: onChainStats } = useStats();
 
   const stats = {
-    total: disputes.length,
+    total: onChainStats?.total_created ?? disputes.length,
     open: disputes.filter((d) => d.state === "open").length,
     evidenceSubmitted: disputes.filter((d) => d.state === "evidence_submitted").length,
     underReview: disputes.filter((d) => d.state === "under_review").length,
-    decided: disputes.filter((d) => d.state === "decided").length,
-    plaintiffWins: disputes.filter((d) => d.verdict === "PLAINTIFF_WINS").length,
-    defendantWins: disputes.filter((d) => d.verdict === "DEFENDANT_WINS").length,
-    split: disputes.filter((d) => d.verdict === "SPLIT").length,
-    dismissed: disputes.filter((d) => d.verdict === "DISMISSED").length,
+    decided: onChainStats?.total_resolved ?? disputes.filter((d) => d.state === "decided").length,
+    plaintiffWins: onChainStats?.plaintiff_wins ?? disputes.filter((d) => d.verdict === "PLAINTIFF_WINS").length,
+    defendantWins: onChainStats?.defendant_wins ?? disputes.filter((d) => d.verdict === "DEFENDANT_WINS").length,
+    split: onChainStats?.split_decisions ?? disputes.filter((d) => d.verdict === "SPLIT").length,
+    dismissed: onChainStats?.dismissed ?? disputes.filter((d) => d.verdict === "DISMISSED").length,
   };
 
   const winRate = stats.decided > 0

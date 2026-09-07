@@ -14,6 +14,18 @@ export interface Dispute {
   state: string;
   verdict: string;
   explanation: string;
+  deadline: number;
+}
+
+export interface Stats {
+  total_created: number;
+  total_resolved: number;
+  plaintiff_wins: number;
+  defendant_wins: number;
+  split_decisions: number;
+  dismissed: number;
+  creation_fee: number;
+  owner: string;
 }
 
 export interface TransactionReceipt {
