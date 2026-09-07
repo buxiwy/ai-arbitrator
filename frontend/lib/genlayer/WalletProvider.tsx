@@ -64,33 +64,38 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     if (!provider) return;
 
     const handleAccountsChanged = async (accounts: string[]) => {
-      if (accounts.length > 0 && typeof window !== "undefined") {
-        localStorage.removeItem(DISCONNECT_FLAG);
+      const wasDisconnected = localStorage.getItem(DISCONNECT_FLAG) === "true";
+      const hadPrevConnection = localStorage.getItem(WALLET_KEY);
+      if (accounts.length > 0 && !wasDisconnected && hadPrevConnection) {
+        const walletId = hadPrevConnection as WalletId;
+        const chainId = await getCurrentChainIdForWallet(walletId);
+        const correctNetwork = await isOnGenLayerNetwork(walletId);
+        setState((prev) => ({
+          ...prev,
+          address: accounts[0] || null,
+          chainId,
+          isConnected: true,
+          isOnCorrectNetwork: correctNetwork,
+          activeWallet: walletId,
+        }));
       }
-      const walletId = (localStorage.getItem(WALLET_KEY) as WalletId) || "metamask";
-      const chainId = await getCurrentChainIdForWallet(walletId);
-      const correctNetwork = await isOnGenLayerNetwork(walletId);
-      setState((prev) => ({
-        ...prev,
-        address: accounts[0] || null,
-        chainId,
-        isConnected: accounts.length > 0,
-        isOnCorrectNetwork: correctNetwork,
-        activeWallet: accounts.length > 0 ? walletId : null,
-      }));
     };
 
     const handleChainChanged = async (chainId: string) => {
-      const walletId = (localStorage.getItem(WALLET_KEY) as WalletId) || "metamask";
-      const correctNetwork = parseInt(chainId, 16) === GENLAYER_CHAIN_ID;
-      const accounts = await getAccountsForWallet(walletId);
-      setState((prev) => ({
-        ...prev,
-        chainId,
-        address: accounts[0] || null,
-        isConnected: accounts.length > 0,
-        isOnCorrectNetwork: correctNetwork,
-      }));
+      const wasDisconnected = localStorage.getItem(DISCONNECT_FLAG) === "true";
+      const hadPrevConnection = localStorage.getItem(WALLET_KEY);
+      if (!wasDisconnected && hadPrevConnection) {
+        const walletId = hadPrevConnection as WalletId;
+        const correctNetwork = parseInt(chainId, 16) === GENLAYER_CHAIN_ID;
+        const accounts = await getAccountsForWallet(walletId);
+        setState((prev) => ({
+          ...prev,
+          chainId,
+          address: accounts[0] || null,
+          isConnected: accounts.length > 0,
+          isOnCorrectNetwork: correctNetwork,
+        }));
+      }
     };
 
     provider.on("accountsChanged", handleAccountsChanged);
