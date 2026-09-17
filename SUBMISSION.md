@@ -37,8 +37,8 @@ A decentralized platform where AI judges evaluate evidence and deliver fair verd
 - Responsive dark-mode UI
 
 ## Contract
-- Address: `0xFF693B73f863eC7527859ddc3471B02865207D64`
-- Network: GenLayer Studio
+- Contract: `0xf04279796DCe4e4E3f2Cf9DfE37A21D63438516f`
+- Network: GenLayer Studio Next (61997)
 
 ## Why GenLayer?
 GenLayer's Intelligent Contracts natively access LLMs. This lets the smart contract itself become the judge — reading evidence, understanding context, and rendering verdicts without oracles or off-chain computation.

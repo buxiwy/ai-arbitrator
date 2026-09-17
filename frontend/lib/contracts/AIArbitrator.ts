@@ -2,6 +2,13 @@ import { createClient } from "genlayer-js";
 import { studionet } from "genlayer-js/chains";
 import type { Dispute, Stats, TransactionReceipt } from "./types";
 
+const studioNext = {
+  ...studionet,
+  id: 61997,
+  name: "GenLayer Studio Next",
+  rpcUrls: { default: { http: ["https://studio.genlayer.com/api"] } },
+};
+
 class AIArbitrator {
   private contractAddress: `0x${string}`;
   private client: any;
@@ -16,7 +23,7 @@ class AIArbitrator {
     this.studioUrl = studioUrl;
 
     const config: any = {
-      chain: studionet,
+      chain: studioNext,
     };
 
     if (address) {
@@ -36,7 +43,7 @@ class AIArbitrator {
 
   updateAccount(address: string): void {
     const config: any = {
-      chain: studionet,
+      chain: studioNext,
       account: address as `0x${string}`,
     };
 
