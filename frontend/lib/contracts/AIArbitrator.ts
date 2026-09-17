@@ -51,6 +51,40 @@ class AIArbitrator {
     this.client = createClient(config);
   }
 
+  /**
+   * GenLayer lifecycle status (ACCEPTED/FINALIZED) only means the network
+   * took the transaction — it does NOT mean the contract code executed
+   * successfully. A failed execution still produces a receipt, so every
+   * write must pass this check or the UI will report false success.
+   */
+  private assertTxAccepted(receipt: any, action: string): void {
+    const status = receipt?.status;
+    const statusName =
+      receipt?.statusName ?? receipt?.status_name ?? receipt?.statusname;
+    const ok =
+      status === 5 ||
+      status === 6 ||
+      statusName === "ACCEPTED" ||
+      statusName === "FINALIZED";
+    if (!ok) {
+      console.error(`${action} receipt:`, receipt);
+      throw new Error(
+        `${action} was not accepted by the network (status: ${
+          statusName ?? status ?? "unknown"
+        }). No state was changed — check the contract address and inputs.`
+      );
+    }
+  }
+
+  private describeError(error: unknown): string {
+    if (error instanceof Error && error.message) return error.message;
+    try {
+      return JSON.stringify(error);
+    } catch {
+      return String(error);
+    }
+  }
+
   async getDisputeCount(): Promise<number> {
     try {
       const count = await this.client.readContract({
@@ -167,10 +201,11 @@ class AIArbitrator {
         interval: 5000,
       });
 
+      this.assertTxAccepted(receipt, "Create dispute");
       return receipt as TransactionReceipt;
     } catch (error) {
       console.error("Error creating dispute:", error);
-      throw new Error("Failed to create dispute");
+      throw new Error(`Failed to create dispute: ${this.describeError(error)}`);
     }
   }
 
@@ -193,10 +228,11 @@ class AIArbitrator {
         interval: 5000,
       });
 
+      this.assertTxAccepted(receipt, "Submit evidence");
       return receipt as TransactionReceipt;
     } catch (error) {
       console.error("Error submitting evidence:", error);
-      throw new Error("Failed to submit evidence");
+      throw new Error(`Failed to submit evidence: ${this.describeError(error)}`);
     }
   }
 
@@ -215,10 +251,11 @@ class AIArbitrator {
         interval: 5000,
       });
 
+      this.assertTxAccepted(receipt, "Start review");
       return receipt as TransactionReceipt;
     } catch (error) {
       console.error("Error starting review:", error);
-      throw new Error("Failed to start review");
+      throw new Error(`Failed to start review: ${this.describeError(error)}`);
     }
   }
 
@@ -237,10 +274,11 @@ class AIArbitrator {
         interval: 5000,
       });
 
+      this.assertTxAccepted(receipt, "Resolve dispute");
       return receipt as TransactionReceipt;
     } catch (error) {
       console.error("Error resolving dispute:", error);
-      throw new Error("Failed to resolve dispute");
+      throw new Error(`Failed to resolve dispute: ${this.describeError(error)}`);
     }
   }
 
@@ -259,10 +297,11 @@ class AIArbitrator {
         interval: 5000,
       });
 
+      this.assertTxAccepted(receipt, "Check timeout");
       return receipt as TransactionReceipt;
     } catch (error) {
       console.error("Error checking timeout:", error);
-      throw new Error("Failed to check timeout");
+      throw new Error(`Failed to check timeout: ${this.describeError(error)}`);
     }
   }
 
